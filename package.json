@@ -1,0 +1,47 @@
+{
+  "name": "@tokens/dsh-browser-use",
+  "version": "0.1.0",
+  "description": "TokensHarness browser-use plugin: bridges the Playwright MCP server so the model can drive a visible browser",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TokensAPI/tokens_DshBrowserUse_code.git"
+  },
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./identity.js": "./identity.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "identity.js",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "check": "node --check index.js && node --test",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh-mcp-client": "0.0.1-rc.1",
+    "@deepseek-ai/schemastery": "^3.18.1",
+    "@playwright/mcp": "0.0.79"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "4.0.1"
+  }
+}
