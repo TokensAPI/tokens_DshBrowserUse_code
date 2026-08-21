@@ -29,6 +29,12 @@ export const Config = Schema.object({
   caps: Schema.string().default(CAPS),
   // 浏览器可执行文件绝对路径；留空按 browser 渠道自动发现。
   executablePath: Schema.string().default(''),
+  // 浏览器 profile（user data）目录绝对路径；留空使用 playwright 的持久化
+  // 专属 profile。注意不要指向正被日常 Chrome 占用的目录：Chrome profile
+  // 同一时间只能被一个实例锁定。
+  userDataDir: Schema.string().default(''),
+  // 光标可视化：把模型的鼠标移动与点击画成可见光标和波纹动画。
+  cursorOverlay: Schema.boolean().default(true),
   // 首次导航失败即中止加载：默认 false 容忍慢启动，由上游按重连策略恢复。
   failOnStartupError: Schema.boolean().default(false),
 })
@@ -42,12 +48,23 @@ export const Config = Schema.object({
 
 const require = createRequire(import.meta.url)
 
+/** 本模块所在目录：解析随包携带的资源文件。 */
+export const moduleDir = dirname(fileURLToPath(import.meta.url))
+
 /**
  * Resolve the local @playwright/mcp CLI entry shipped with this plugin.
  * @returns {string} Absolute path of the MCP server entry script.
  */
 export function resolveServerEntry() {
   return join(dirname(require.resolve('@playwright/mcp/package.json')), 'cli.js')
+}
+
+/**
+ * Resolve the cursor-overlay init script shipped with this plugin.
+ * @returns {string} Absolute path of the overlay script.
+ */
+export function resolveCursorOverlay() {
+  return join(moduleDir, 'cursor-overlay.js')
 }
 
 /**
@@ -65,36 +82,32 @@ export function buildServerArgs(config) {
   if (typeof config.executablePath === 'string' && config.executablePath.trim() !== '') {
     args.push(`--executable-path=${config.executablePath.trim()}`)
   }
+  if (typeof config.userDataDir === 'string' && config.userDataDir.trim() !== '') {
+    args.push(`--user-data-dir=${config.userDataDir.trim()}`)
+  }
+  if (config.cursorOverlay) args.push(`--init-script=${resolveCursorOverlay()}`)
   return args
 }
 
 /**
  * Build the upstream mcp-client config that launches the bundled server.
+ * 直接以当前可执行文件运行 cli.js：真实 .exe 在任何平台都可被 spawn，
+ * 无需 cmd/npx 包装（cmd 包装还会把含逗号的参数错误拆分）。
  * @param {object} config Validated plugin config.
- * @param {string} [platform] Node platform identifier; defaults to the current process.
  * @returns {object} Raw config for the upstream mcp-client plugin.
  */
-export function buildClientConfig(config, platform = process.platform) {
-  const entry = resolveServerEntry()
-  const serverArgs = buildServerArgs(config)
-  const node = process.execPath
-  const spawnSpec = platform === 'win32'
-    ? {
-        command: process.env.ComSpec ?? join(process.env.SystemRoot ?? 'C:\\Windows', 'System32', 'cmd.exe'),
-        args: ['/d', '/s', '/c', [node, entry, ...serverArgs].map(quoteCmdArgument).join(' ')],
-      }
-    : { command: node, args: [entry, ...serverArgs] }
+export function buildClientConfig(config) {
   return {
     serverName: SERVER_NAME,
     transport: 'stdio',
-    ...spawnSpec,
+    command: process.execPath,
+    args: [resolveServerEntry(), ...buildServerArgs(config)],
+    // 桌面运行时的 process.execPath 是 Electron 可执行文件：必须带
+    // ELECTRON_RUN_AS_NODE 才会以 Node 语义执行 cli.js，否则会拉起
+    // 整个 GUI 应用导致 MCP 连接静默失败。纯 Node 环境下该变量无害。
+    env: { ELECTRON_RUN_AS_NODE: '1' },
     failOnStartupError: config.failOnStartupError,
   }
-}
-
-function quoteCmdArgument(value) {
-  if (/^[A-Za-z0-9:._\\/@=-]+$/u.test(value)) return value
-  return `"${value.replaceAll('"', '""')}"`
 }
 
 /* ====================================================================
@@ -112,5 +125,3 @@ export async function apply(ctx, config) {
   await mcpClient.apply(ctx, mcpClient.Config(buildClientConfig(config)))
 }
 
-/** 别名导出：便于文件级 URL 判断（fileURLToPath 供测试对齐路径分隔符）。 */
-export const moduleDir = dirname(fileURLToPath(import.meta.url))

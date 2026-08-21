@@ -18,7 +18,10 @@ test('defaults keep a visible reusable browser', () => {
   assert.equal(config.headless, false)
   assert.equal(config.isolated, false)
   const args = buildServerArgs(config)
-  assert.deepEqual(args, ['--browser=chrome'])
+  assert.equal(args[0], '--browser=chrome')
+  assert.equal(args[1], '--caps=vision,pdf,devtools')
+  assert.match(args[2], /^--init-script=.*cursor-overlay\.js$/u)
+  assert.equal(args.length, 3)
 })
 
 test('config toggles translate into CLI flags', () => {
@@ -28,6 +31,8 @@ test('config toggles translate into CLI flags', () => {
     isolated: true,
     caps: 'vision,pdf',
     executablePath: 'C:\\Browsers\\chrome.exe',
+    userDataDir: 'D:\\Profiles\\work',
+    cursorOverlay: false,
   }))
   assert.deepEqual(args, [
     '--browser=msedge',
@@ -35,6 +40,7 @@ test('config toggles translate into CLI flags', () => {
     '--isolated',
     '--caps=vision,pdf',
     '--executable-path=C:\\Browsers\\chrome.exe',
+    '--user-data-dir=D:\\Profiles\\work',
   ])
 })
 
@@ -47,16 +53,13 @@ test('server entry resolves to the bundled @playwright/mcp cli', () => {
   assert.match(entry, /[\\/]@playwright[\\/]mcp[\\/]cli\.js$/u)
 })
 
-test('client config wraps npx-free node spawn per platform', () => {
-  const posix = buildClientConfig(Config({}), 'linux')
-  assert.equal(posix.serverName, SERVER_NAME)
-  assert.equal(posix.transport, 'stdio')
-  assert.equal(posix.command, process.execPath)
-  assert.match(posix.args[0], /cli\.js$/u)
-
-  const windows = buildClientConfig(Config({}), 'win32')
-  assert.match(windows.command, /cmd\.exe$/iu)
-  assert.deepEqual(windows.args.slice(0, 3), ['/d', '/s', '/c'])
-  assert.ok(windows.args[3].includes('cli.js'))
-  assert.ok(windows.args[3].includes('--browser=chrome'))
+test('client config spawns the bundled cli with the node executable', () => {
+  const client = buildClientConfig(Config({}))
+  assert.equal(client.serverName, SERVER_NAME)
+  assert.equal(client.transport, 'stdio')
+  assert.equal(client.command, process.execPath)
+  assert.match(client.args[0], /cli\.js$/u)
+  // 参数保持独立数组元素传递，含逗号的 caps 不能经 shell 再解析。
+  assert.ok(client.args.includes('--caps=vision,pdf,devtools'))
+  assert.equal(client.env.ELECTRON_RUN_AS_NODE, '1')
 })

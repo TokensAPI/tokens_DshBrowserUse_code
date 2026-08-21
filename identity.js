@@ -36,5 +36,12 @@ export const HEADLESS = false
 /** 隔离模式：默认 false 使用持久化 profile（保留登录态）；true 则每次会话全新环境。可被 config.isolated 覆盖。 */
 export const ISOLATED = false
 
-/** 额外能力（逗号分隔，如 "vision,pdf"）：默认为空走纯无障碍快照。可被 config.caps 覆盖。 */
-export const CAPS = ''
+/**
+ * 额外能力（逗号分隔）：默认全量开启——
+ *   vision   坐标驱动的鼠标工具（截图 + 真实光标移动，Codex 同款交互形态）
+ *   pdf      页面另存为 PDF
+ *   devtools 控制台/网络等开发者工具
+ * 快照与坐标两套操作工具同时注册，模型按任务自行选用；
+ * 追求最小工具面时可经 config.caps 覆盖为 '' 只留快照模式。
+ */
+export const CAPS = 'vision,pdf,devtools'
