@@ -10,7 +10,7 @@
 export const PRODUCT_NAME = 'TokensHarness'
 
 /** npm 包名：须与 package.json 的 name 和 cordis.patch.yml 的 name 一致。 */
-export const PACKAGE_NAME = '@tokens/dsh-browser-use'
+export const PACKAGE_NAME = '@tokensapi/dsh-browser-use'
 
 /** Cordis 插件名：harness 日志与加载器中显示的名字。 */
 export const PLUGIN_NAME = 'tokens-dsh-browser-use'
