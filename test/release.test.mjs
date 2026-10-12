@@ -30,6 +30,7 @@ test('branch checks and tag releases are disjoint and gate on the same matrix', 
   assert.deepEqual(checks.on, { push: { branches: ['**'] }, pull_request: null });
   assert.deepEqual(release.on, { push: { tags: ['v*'] } });
   assert.deepEqual(release.jobs.check.strategy.matrix, checks.jobs.check.strategy.matrix);
+  assert.deepEqual(release.jobs.check.steps, checks.jobs.check.steps);
   for (const w of [checks, release]) {
     assert.deepEqual(w.permissions, { contents: 'read' });
     assert.equal(w.concurrency.group, '${{ github.workflow }}-${{ github.ref }}');
