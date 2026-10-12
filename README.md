@@ -1,4 +1,4 @@
-# @tokens/dsh-browser-use
+# @tokensapi/dsh-browser-use
 
 TokensHarness 浏览器操作插件：让模型直接驱动一个**可见的真实浏览器**（导航、点击、填表、截图、读取页面结构）。
 
@@ -33,5 +33,17 @@ TokensHarness 浏览器操作插件：让模型直接驱动一个**可见的真�
 
 ```sh
 npm install
-npm run check   # 语法 + 6 项单测
+npm run check   # 语法检查 + 全部单测
 ```
+
+## 发布
+
+推送 `v<版本号>` 标签即发布到私有源 `https://npm.tokensapi.ai/`，只有这一个入口；分支和 PR 只跑 `checks.yml`。
+发布工作流自带同一套 Node 22.19 / 24 检查矩阵（`needs:` 不能跨工作流，所以不是重复，不要删），通过后校验标签、版本、仓库和 Registry 身份，只在确认版本未发布（仅 E404）时发布同一份 tarball，不覆盖已有版本。
+
+需要的仓库 Secret：
+
+- `VERDACCIO_PUBLISH_TOKEN`：发布账号 `tokenscowork`，只交给发布步骤；缺失时发布前失败。
+- `PLUGIN_CHECK_REGISTRY_TOKEN`：`market` 只读账号，用于发布后的统一包检查；未配置时警告并跳过检查，不阻断发布。
+
+失败后在 Actions 页面重跑原运行，不要为让重试通过而改版本号。
