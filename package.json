@@ -1,6 +1,6 @@
 {
   "name": "@tokensapi/dsh-browser-use",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "TokensHarness browser-use plugin: bridges the Playwright MCP server so the model can drive a visible browser",
   "tokenscowork": {
     "displayName": {
