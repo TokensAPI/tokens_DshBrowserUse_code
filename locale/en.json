@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Browser Use",
+    "description": "Bridge Playwright MCP so the model can drive a visible browser through web tasks, with an on-screen cursor and coordinate mode."
+  }
+}

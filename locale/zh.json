@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "浏览器操作",
+    "description": "桥接 Playwright MCP，让模型驱动可见浏览器完成网页操作，带可视光标与坐标模式。"
+  }
+}

@@ -2,6 +2,16 @@
   "name": "@tokensapi/dsh-browser-use",
   "version": "0.1.0",
   "description": "TokensHarness browser-use plugin: bridges the Playwright MCP server so the model can drive a visible browser",
+  "tokenscowork": {
+    "displayName": {
+      "zh-CN": "浏览器操作",
+      "en-US": "Browser Use"
+    },
+    "summary": {
+      "zh-CN": "桥接 Playwright MCP，让模型驱动可见浏览器完成网页操作，带可视光标与坐标模式。",
+      "en-US": "Bridge Playwright MCP so the model can drive a visible browser through web tasks, with an on-screen cursor and coordinate mode."
+    }
+  },
   "license": "MIT",
   "type": "module",
   "repository": {
@@ -13,15 +23,20 @@
     ".": "./index.js",
     "./identity.js": "./identity.js",
     "./cordis.patch.yml": "./cordis.patch.yml",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
   },
   "files": [
     "index.js",
     "identity.js",
     "cursor-overlay.js",
     "cordis.patch.yml",
-    "README.md"
+    "README.md",
+    "locale/*.json"
   ],
+  "publishConfig": {
+    "registry": "https://npm.tokensapi.ai/"
+  },
   "engines": {
     "node": "^22.19.0 || >=24.0.0"
   },
